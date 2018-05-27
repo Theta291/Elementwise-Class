@@ -1,7 +1,13 @@
 OVERLOADABLE_OPERATORS = {'init', 'call', 'del', 'repr', 'str', 'unicode', 'nonzero', 'cmp', 'eq', 'ne', 'lt', 'le', 'ge', 'gt', 'add', 'sub', 'mul', 'div', 'truediv', 'floordiv', 'mod', 'divmod', 'pow', 'lshift', 'rshift', 'and', 'or', 'xor', 'radd', 'rsub', 'rmul', 'rdiv', 'rfloordiv', 'rmod', 'rdivmod', 'rpow', 'rlshift', 'rrshift', 'rand', 'ror', 'rxor', 'iadd', 'isub', 'imul', 'idiv', 'itruediv', 'ifloordiv', 'imod', 'ipow', 'ilshift', 'irshift', 'iand', 'ior', 'ixor', 'neg', 'pos', 'invert', 'abs', 'float', 'hex', 'int', 'long', 'oct', 'index', 'complex', 'len', 'contains', 'iter', 'reversed', 'getitem', 'setitem', 'delitem', 'getslice', 'setslice', 'delslice', 'getattr', 'getattribute', 'setattr', 'delattr', 'hash', 'get', 'set', 'delete', 'getstate', 'setstate', 'getinitargs', 'getnewargs', 'reduce', 'reduce_ex', 'newobj', 'copy', 'deepcopy', 'enter', 'exit', 'new', 'coerce', 'subclasses', 'dict', 'vars', 'class', 'metaclass', 'bases', 'name', 'slots', 'weakref', 'doc', 'file', 'import', 'builtins', 'all', 'builtin', 'main', 'future', 'requires', 'traceback_hide', 'debug'}
+
 OVERLOADABLE_BINARY_OPERATORS = {'cmp', 'eq', 'ne', 'lt', 'le', 'ge', 'gt', 'add', 'sub', 'mul', 'div', 'truediv', 'floordiv', 'mod', 'divmod', 'pow', 'lshift', 'rshift', 'and', 'or', 'xor'}
-UNSAFE_OVERLOADABLE_OPERATORS = {'init', 'getattr', 'getattribute', 'debug', 'newobj'}
-SAFE_OVERLOADABLE_OPERATORS = OVERLOADABLE_BINARY_OPERATORS.union({'call', 'len'})
+REVERSED_BINARY_OPERATORS = {'r' + elem for elem in OVERLOADABLE_BINARY_OPERATORS}
+
+SAFE_OVERLOADABLE_OPERATORS = OVERLOADABLE_BINARY_OPERATORS.union({'call'})
+SAFE_OVERLOADABLE_OPERATORS.update(REVERSED_BINARY_OPERATORS)
+
+UNSAFE_OVERLOADABLE_OPERATORS = {'init', 'getattr', 'debug'}
+#SAFE_OVERLOADABLE_OPERATORS = OVERLOADABLE_OPERATORS - UNSAFE_OVERLOADABLE_OPERATORS
 
 '''
 This is a class designed to allow an operation to apply to every element of a user-defined container.
@@ -11,13 +17,7 @@ A class 'C' that wants to use this must meet a few requirements:
     - It must be subscriptable
     - It be able to accept a list as the only argument for a call to its constructor
 
-To enable the usage of the elementwise operation for a class, define the __getattr__ method for the class if there wasn't any, make sure that __getattr__(self, 'e')
-returns elementWise(self). For example, the following definition would suffice:
-
-def __getattr__(self, attr):
-    if attr == 'e':
-        return elementWise(self)
-    raise AttributeError("'" + self.__class__.__name__ + "' object has no attribute '" + attr + "'")
+To enable the usage of the elementwise operation for a class, add the wrapper '@addElemWise' to the beginning of the class definition.
 
 This class currently works for all binary operators, __call__, and any user-defined methods defined for all the iterates of the instance being
 operated over. It only works for positional arguments.
@@ -97,3 +97,12 @@ class elementWise:
         except Exception as err:
             print(err)
             print(operatorName)
+
+def addElemWise(cls):
+    class newCls(cls):
+        def __getattr__(self, attr):
+            if attr == 'e':
+                return elementWise(self)
+            else:
+                return super().__getattr__(attr)
+    return newCls
