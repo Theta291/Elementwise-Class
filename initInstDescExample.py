@@ -1,7 +1,7 @@
-import elemWise
+from elementwise import *
 import exampleClasses
 
-@elemWise.initInstDesc.createDesc('o')
+@initInstDesc.createDesc('o')
 class outerProd:
     def __init__(self, vec):
         self.vec = vec
