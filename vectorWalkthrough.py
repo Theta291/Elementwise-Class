@@ -1,4 +1,4 @@
-from elemWise import *
+from elementwise import *
 import string
 
 #This file implements a vector class using the elementwise module, and has a walkthrough for it in the comments.
