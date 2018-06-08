@@ -9,7 +9,8 @@ class outerProd:
     def __mul__(self, vec2):
         return exampleClasses.matrix(self.vec.e * vec2.e)
     
-vector = outerProd.addDesc(exampleClasses.vector)
+@outerProd.addDesc
+vector = exampleClasses.vector
         
 vec1 = vector((1, 2, 3))
 vec2 = vector((4, 5, 6))
